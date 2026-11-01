@@ -1,0 +1,20 @@
+name: trade-gang
+
+services:
+  mongo:
+    image: mongo:8.2
+    container_name: trade-gang-mongo
+    restart: unless-stopped
+    # Bound to loopback only: the database is never reachable from your network.
+    ports:
+      - "127.0.0.1:27017:27017"
+    volumes:
+      - trade-gang-mongo:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+
+volumes:
+  trade-gang-mongo:

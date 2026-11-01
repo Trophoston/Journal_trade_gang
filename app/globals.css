@@ -1,0 +1,600 @@
+@layer theme, base, components, surfaces, utilities;
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ───────────────────────── Registered properties ─────────────────────────
+   Registering the glass knobs lets the browser interpolate them, so switching
+   Most → Mid → None animates instead of snapping. */
+@property --g-chrome-blur { syntax: "<length>"; inherits: true; initial-value: 0px; }
+@property --g-card-blur { syntax: "<length>"; inherits: true; initial-value: 0px; }
+@property --g-chrome-alpha { syntax: "<number>"; inherits: true; initial-value: 1; }
+@property --g-card-alpha { syntax: "<number>"; inherits: true; initial-value: 1; }
+@property --g-sat { syntax: "<number>"; inherits: true; initial-value: 1; }
+@property --g-sheen { syntax: "<number>"; inherits: true; initial-value: 0; }
+@property --g-aurora { syntax: "<number>"; inherits: true; initial-value: 0; }
+
+/* ───────────────────────── Color tokens ─────────────────────────
+   Semantics: green = profit, red = loss, blue = primary/live/selection,
+   violet = written by AI, metal = neutral / break-even / chrome.
+   Chart hues validated with the dataviz palette validator (light + dark). */
+:root {
+  color-scheme: light;
+  --bg: #edf0f5;
+  --surface: #ffffff;
+  --surface-2: #f4f6f9;
+  --surface-3: #e9edf3;
+  --fg: #0f1623;
+  --fg-2: #46536a;
+  --fg-3: #687489;
+  --line: rgb(15 22 35 / 0.08);
+  --line-strong: rgb(15 22 35 / 0.14);
+
+  --blue: #2a6fdb;
+  --blue-ink: #1f5fc4;
+  --green: #0e9f6e;
+  --green-ink: #0a7a55;
+  --red: #e0464b;
+  --red-ink: #c4323a;
+  --violet: #7c5cf0;
+  --violet-ink: #5f3fd9;
+  --metal: #8a94a6;
+  --metal-ink: #5b6577;
+  --amber: #c98500;
+
+  --green-soft: rgb(14 159 110 / 0.12);
+  --red-soft: rgb(224 70 75 / 0.12);
+  --blue-soft: rgb(42 111 219 / 0.11);
+  --violet-soft: rgb(124 92 240 / 0.11);
+  --metal-soft: rgb(138 148 166 / 0.16);
+
+  /* metal rim + specular highlight */
+  --rim-a: rgb(255 255 255 / 0.95);
+  --rim-b: rgb(196 204 216 / 0.55);
+  --rim-c: rgb(255 255 255 / 0.4);
+  --rim-d: rgb(170 180 196 / 0.5);
+  --hl-top: rgb(255 255 255 / 0.85);
+  --sheen-color: rgb(255 255 255 / 0.55);
+  --shadow-card: 0 1px 2px rgb(15 22 35 / 0.04), 0 8px 24px -12px rgb(15 22 35 / 0.12);
+  --shadow-float: 0 2px 6px rgb(15 22 35 / 0.06), 0 24px 48px -16px rgb(15 22 35 / 0.22);
+
+  --aurora-1: rgb(14 159 110 / 0.22);
+  --aurora-2: rgb(42 111 219 / 0.24);
+  --aurora-3: rgb(124 92 240 / 0.2);
+
+  --radius-card: 24px;
+  --radius-inner: 16px;
+  --radius-control: 10px;
+}
+
+.dark {
+  color-scheme: dark;
+  --bg: #0a0d13;
+  --surface: #141923;
+  --surface-2: #1a2030;
+  --surface-3: #222a3b;
+  --fg: #eef1f6;
+  --fg-2: #aab4c5;
+  --fg-3: #7f8a9d;
+  --line: rgb(255 255 255 / 0.07);
+  --line-strong: rgb(255 255 255 / 0.13);
+
+  --blue: #3f82e6;
+  --blue-ink: #79a8f2;
+  --green: #1fa572;
+  --green-ink: #43d49b;
+  --red: #e2525a;
+  --red-ink: #ff8086;
+  --violet: #8a72ee;
+  --violet-ink: #ad9bf8;
+  --metal: #8d97a8;
+  --metal-ink: #aab3c2;
+  --amber: #e0a32e;
+
+  --green-soft: rgb(31 165 114 / 0.16);
+  --red-soft: rgb(226 82 90 / 0.16);
+  --blue-soft: rgb(63 130 230 / 0.16);
+  --violet-soft: rgb(138 114 238 / 0.17);
+  --metal-soft: rgb(141 151 168 / 0.14);
+
+  --rim-a: rgb(255 255 255 / 0.22);
+  --rim-b: rgb(255 255 255 / 0.05);
+  --rim-c: rgb(255 255 255 / 0.12);
+  --rim-d: rgb(255 255 255 / 0.04);
+  --hl-top: rgb(255 255 255 / 0.08);
+  --sheen-color: rgb(255 255 255 / 0.1);
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.3), 0 12px 32px -16px rgb(0 0 0 / 0.6);
+  --shadow-float: 0 2px 8px rgb(0 0 0 / 0.35), 0 28px 56px -20px rgb(0 0 0 / 0.75);
+
+  --aurora-1: rgb(31 165 114 / 0.16);
+  --aurora-2: rgb(63 130 230 / 0.2);
+  --aurora-3: rgb(138 114 238 / 0.2);
+}
+
+/* Colorblind-safe palette: profit/loss become blue/orange (validated pair). */
+:root[data-palette="cb"] {
+  --green: #2a6fdb;
+  --green-ink: #1f5fc4;
+  --green-soft: rgb(42 111 219 / 0.12);
+  --red: #eb6834;
+  --red-ink: #b8461a;
+  --red-soft: rgb(235 104 52 / 0.13);
+}
+.dark[data-palette="cb"] {
+  --green: #3987e5;
+  --green-ink: #79a8f2;
+  --green-soft: rgb(57 135 229 / 0.16);
+  --red: #d95926;
+  --red-ink: #ff9a6b;
+  --red-soft: rgb(217 89 38 / 0.18);
+}
+
+/* ───────────────────────── Liquid glass levels ─────────────────────────
+   Three surface tiers (chrome > card > data) scaled by one global level. */
+:root {
+  transition:
+    --g-chrome-blur 450ms ease, --g-card-blur 450ms ease, --g-chrome-alpha 450ms ease,
+    --g-card-alpha 450ms ease, --g-sat 450ms ease, --g-sheen 450ms ease, --g-aurora 600ms ease;
+}
+:root,
+:root[data-glass="most"] {
+  --g-chrome-blur: 26px;
+  --g-card-blur: 18px;
+  --g-chrome-alpha: 0.5;
+  --g-card-alpha: 0.62;
+  --g-sat: 1.8;
+  --g-sheen: 1;
+  --g-aurora: 1;
+}
+:root[data-glass="mid"] {
+  --g-chrome-blur: 16px;
+  --g-card-blur: 10px;
+  --g-chrome-alpha: 0.74;
+  --g-card-alpha: 0.84;
+  --g-sat: 1.35;
+  --g-sheen: 0;
+  --g-aurora: 0.65;
+}
+:root[data-glass="none"] {
+  --g-chrome-blur: 0px;
+  --g-card-blur: 0px;
+  --g-chrome-alpha: 1;
+  --g-card-alpha: 1;
+  --g-sat: 1;
+  --g-sheen: 0;
+  --g-aurora: 0;
+}
+@media (prefers-reduced-transparency: reduce) {
+  :root:not([data-glass-user]) {
+    --g-chrome-blur: 0px;
+    --g-card-blur: 0px;
+    --g-chrome-alpha: 1;
+    --g-card-alpha: 1;
+    --g-sheen: 0;
+    --g-aurora: 0;
+  }
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-fg: var(--fg);
+  --color-fg-2: var(--fg-2);
+  --color-fg-3: var(--fg-3);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-blue: var(--blue);
+  --color-blue-ink: var(--blue-ink);
+  --color-blue-soft: var(--blue-soft);
+  --color-green: var(--green);
+  --color-green-ink: var(--green-ink);
+  --color-green-soft: var(--green-soft);
+  --color-red: var(--red);
+  --color-red-ink: var(--red-ink);
+  --color-red-soft: var(--red-soft);
+  --color-violet: var(--violet);
+  --color-violet-ink: var(--violet-ink);
+  --color-violet-soft: var(--violet-soft);
+  --color-metal: var(--metal);
+  --color-metal-ink: var(--metal-ink);
+  --color-metal-soft: var(--metal-soft);
+  --color-amber: var(--amber);
+  --font-sans: var(--font-geist-sans), var(--font-thai), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --radius-card: var(--radius-card);
+  --radius-inner: var(--radius-inner);
+  --radius-control: var(--radius-control);
+  --ease-spring: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ───────────────────────── Base ───────────────────────── */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-rendering: optimizeLegibility;
+}
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  font-feature-settings: "cv11", "ss01";
+  min-height: 100dvh;
+}
+/* Static aurora behind the glass. Never animated: blur stays cheap. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: -10vmax;
+  z-index: -1;
+  pointer-events: none;
+  opacity: var(--g-aurora);
+  background:
+    radial-gradient(38vmax 30vmax at 12% 8%, var(--aurora-2), transparent 70%),
+    radial-gradient(34vmax 28vmax at 88% 14%, var(--aurora-3), transparent 70%),
+    radial-gradient(40vmax 30vmax at 70% 96%, var(--aurora-1), transparent 70%),
+    radial-gradient(30vmax 24vmax at 6% 86%, var(--aurora-3), transparent 72%);
+}
+::selection {
+  background: color-mix(in oklab, var(--blue) 30%, transparent);
+}
+:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}
+@layer surfaces {
+  .num {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum", "cv11";
+    letter-spacing: -0.01em;
+  }
+}
+
+@layer surfaces {
+/* ───────────────────────── Surfaces ───────────────────────── */
+.glass-card,
+.glass-chrome,
+.glass-solid {
+  position: relative;
+  isolation: isolate;
+}
+.glass-card {
+  border-radius: var(--radius-card);
+  background: color-mix(in oklab, var(--surface) calc(var(--g-card-alpha) * 100%), transparent);
+  -webkit-backdrop-filter: blur(var(--g-card-blur)) saturate(var(--g-sat));
+  backdrop-filter: blur(var(--g-card-blur)) saturate(var(--g-sat));
+  box-shadow: var(--shadow-card), inset 0 1px 0 0 var(--hl-top);
+}
+.glass-chrome {
+  background: color-mix(in oklab, var(--surface) calc(var(--g-chrome-alpha) * 100%), transparent);
+  -webkit-backdrop-filter: blur(var(--g-chrome-blur)) saturate(var(--g-sat));
+  backdrop-filter: blur(var(--g-chrome-blur)) saturate(var(--g-sat));
+  box-shadow: var(--shadow-float), inset 0 1px 0 0 var(--hl-top);
+}
+.glass-solid {
+  background: var(--surface);
+}
+/* Brushed-metal hairline rim */
+.glass-card::before,
+.glass-chrome::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(155deg, var(--rim-a), var(--rim-b) 38%, var(--rim-c) 62%, var(--rim-d));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  pointer-events: none;
+  z-index: 1;
+}
+/* Pointer-following sheen (glass level "Most" only, via --g-sheen) */
+.sheen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  /* --mx/--my are viewport coordinates set on :root; a fixed background maps them onto any card. */
+  background: radial-gradient(420px circle at var(--mx, 50%) var(--my, -30%), var(--sheen-color), transparent 42%);
+  background-attachment: fixed;
+  transition: opacity 400ms ease;
+  z-index: 0;
+}
+.sheen:hover::after {
+  opacity: var(--g-sheen);
+}
+
+/* AI surfaces get a faint violet wash so AI text is never mistaken for fact */
+.ai-wash {
+  background-image: linear-gradient(160deg, var(--violet-soft), transparent 55%);
+}
+
+/* ───────────────────────── Loading ───────────────────────── */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--surface-3);
+  border-radius: 8px;
+}
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--surface) 60%, transparent), transparent);
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+/* Time left on a toast; sonner pauses its timers while the stack is hovered, so the bar does too. */
+@keyframes toast-time {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+.toast-time {
+  transform-origin: left;
+  animation: toast-time var(--toast-d) linear forwards;
+}
+[data-sonner-toaster]:hover .toast-time {
+  animation-play-state: paused;
+}
+/* Collapsed stack: cards behind the front one take its height and show only their edge
+   (sonner does this itself only for its built-in styles). */
+[data-sonner-toast][data-expanded="false"][data-front="false"] > * {
+  height: var(--front-toast-height);
+}
+[data-sonner-toast] > * > * {
+  transition: opacity 200ms;
+}
+[data-sonner-toast][data-expanded="false"][data-front="false"] > * > * {
+  opacity: 0;
+}
+
+@keyframes shimmer {
+  to {
+    transform: translateX(100%);
+  }
+}
+/* Skeletons fade in late, so fast local data never flashes a placeholder */
+.appear-late {
+  animation: appear 220ms ease 180ms both;
+}
+@keyframes appear {
+  from {
+    opacity: 0;
+  }
+}
+/* Modal backdrop: the sheet itself morphs from the row, the backdrop only fades */
+.tg-overlay {
+  animation: appear 260ms ease-out both;
+}
+
+@keyframes orb-spin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+
+}
+
+/* ───────────────────────── View transitions ─────────────────────────
+   Page swaps: old content leaves fast, new content arrives gently. */
+:root {
+  --vt-exit: 140ms;
+  --vt-enter: 240ms;
+  --vt-move: 420ms;
+}
+::view-transition {
+  pointer-events: none;
+}
+::view-transition-group(*) {
+  animation-duration: var(--vt-move);
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+::view-transition-old(.page) {
+  animation: var(--vt-exit) ease-in both vt-fade reverse;
+}
+::view-transition-new(.page) {
+  animation:
+    var(--vt-enter) ease-out var(--vt-exit) both vt-fade,
+    var(--vt-move) cubic-bezier(0.22, 1, 0.36, 1) both vt-rise;
+}
+::view-transition-old(.reveal) {
+  animation: 120ms ease-out both vt-fade reverse;
+}
+::view-transition-new(.reveal) {
+  animation:
+    220ms ease-out both vt-fade,
+    380ms cubic-bezier(0.22, 1, 0.36, 1) both vt-rise;
+}
+::view-transition-old(.morph),
+::view-transition-new(.morph) {
+  animation-duration: var(--vt-move);
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+::view-transition-group(app-chrome),
+::view-transition-group(app-dock) {
+  animation: none;
+  z-index: 100;
+}
+::view-transition-old(app-chrome),
+::view-transition-old(app-dock) {
+  display: none;
+}
+::view-transition-new(app-chrome),
+::view-transition-new(app-dock) {
+  animation: none;
+}
+@keyframes vt-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes vt-rise {
+  from {
+    transform: translateY(10px);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* ───────────────────────── Reduced motion ───────────────────────── */
+:root[data-motion="off"] *,
+:root[data-motion="off"] *::before,
+:root[data-motion="off"] *::after {
+  animation-duration: 0s !important;
+  animation-delay: 0s !important;
+  transition-duration: 0s !important;
+}
+:root[data-motion="off"]::view-transition-group(*),
+:root[data-motion="off"]::view-transition-old(*),
+:root[data-motion="off"]::view-transition-new(*) {
+  animation: none !important;
+}
+:root[data-motion="reduced"]::view-transition-new(.page),
+:root[data-motion="reduced"]::view-transition-new(.reveal) {
+  animation: var(--vt-enter) ease-out both vt-fade;
+}
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-motion="full"])::view-transition-group(*),
+  :root:not([data-motion="full"])::view-transition-old(*),
+  :root:not([data-motion="full"])::view-transition-new(*) {
+    animation-duration: 0.01s !important;
+    animation-delay: 0s !important;
+  }
+  .skeleton::after {
+    animation: none;
+  }
+}
+
+/* ───────────────────────── Theme switch: circular reveal ───────────────────────── */
+:root[data-theme-switching]::view-transition-old(root),
+:root[data-theme-switching]::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+:root[data-theme-switching]::view-transition-new(root) {
+  z-index: 2;
+}
+
+/* ───────────────────────── Bento intro (once per browser session) ───────────────────────── */
+.bento-in {
+  animation: bento-in 620ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--i, 0) * 45ms);
+}
+:root[data-intro="done"] .bento-in {
+  animation: none;
+}
+@keyframes bento-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.985);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-motion="full"]) .bento-in {
+    animation: none;
+  }
+}
+:root[data-motion="reduced"] .bento-in {
+  animation: none;
+}
+
+/* ───────────────────────── Charts ───────────────────────── */
+.chart-grid line {
+  stroke: var(--line);
+}
+.chart-axis text {
+  fill: var(--fg-3);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+.draw-in {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: draw 900ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+@keyframes draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Markdown written by the AI */
+.prose-ai {
+  line-height: 1.65;
+}
+.prose-ai p + p,
+.prose-ai p + ul,
+.prose-ai ul + p {
+  margin-top: 0.6em;
+}
+.prose-ai ul {
+  list-style: disc;
+  padding-left: 1.2em;
+}
+.prose-ai ol {
+  list-style: decimal;
+  padding-left: 1.2em;
+}
+.prose-ai li + li {
+  margin-top: 0.25em;
+}
+.prose-ai strong {
+  font-weight: 600;
+  color: var(--fg);
+}
+.prose-ai code {
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+  padding: 0.1em 0.35em;
+  border-radius: 6px;
+  background: var(--surface-3);
+}
+.prose-ai h1,
+.prose-ai h2,
+.prose-ai h3 {
+  font-weight: 600;
+  margin: 0.8em 0 0.3em;
+}
+.prose-ai table {
+  font-size: 0.9em;
+  margin: 0.6em 0;
+}
+.prose-ai th,
+.prose-ai td {
+  padding: 0.3em 0.6em;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}

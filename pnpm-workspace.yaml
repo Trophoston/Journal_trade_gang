@@ -1,0 +1,7 @@
+ignoredBuiltDependencies:
+  - sharp
+  - unrs-resolver
+  - "@google/genai"
+  - protobufjs
+onlyBuiltDependencies:
+  - esbuild
